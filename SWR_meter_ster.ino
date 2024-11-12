@@ -59,7 +59,7 @@ int rev_calc = 0;
 int p_curr = 0;			// licznik odczytów
 float fwd_pwr;
 float rev_pwr;
-#define SWR_SAMPLES_CNT             5
+#define SWR_SAMPLES_CNT             2		// ilość pomiarów do uśredniania
 #define inputFactorVoltage (5.0/1023.0)
 #ifdef SP2HYO
 #define pwrForwardFactor (inputFactorVoltage * (360.0/5.0))
@@ -277,39 +277,11 @@ void read_inputs()
 	{
 		// Compute average values
 		forwardValueAvg = fwd_calc / SWR_SAMPLES_CNT;
-		//fwd_pwr = sq((forwardValueAvg) * pwrForwardFactor) / 50; NA RAZIE niepotrzebne
 		returnValueAvg = rev_calc / SWR_SAMPLES_CNT;
-		//rev_pwr = sq((returnValueAvg) * pwrReturnFactor) / 50;
-
-		/*
-		PowerFromADCValue(swrm.fwd_calc / SWR_SAMPLES_CNT, sensor_null,
-				coupling_calc, &swrm.fwd_pwr, &swrm.fwd_dbm);
-		PowerFromADCValue(swrm.rev_calc / SWR_SAMPLES_CNT, sensor_null,
-				coupling_calc, &swrm.rev_pwr, &swrm.rev_dbm);
-*/
 		// Reset accumulators and variables for power measurements
 		p_curr = 0;
 		fwd_calc = 0;
 		rev_calc = 0;
-		// Calculate VSWR from power readings
-/*
-		swrm.vswr = (1 + sqrtf(swrm.rev_pwr / swrm.fwd_pwr))
-				/ (1 - sqrtf(swrm.rev_pwr / swrm.fwd_pwr));
-*/
-		/*
-		 // Perform VSWR protection iff threshold is > 1 AND enough forward power exists for a valid calculation
-		 if ( ts.vswr_protection_threshold > 1 && swrm.fwd_pwr >= SWR_MIN_CALC_POWER)
-		 {
-		 if ( swrm.vswr > ts.vswr_protection_threshold )
-		 {
-		 RadioManagement_DisablePaBias ( );
-		 swrm.high_vswr_detected = true;
-		 // change output power to "PA_LEVEL_0_5W" when VSWR protection is active
-		 RadioManagement_SetPowerLevel ( RadioManagement_GetBand ( df.tune_new), PA_LEVEL_MINIMAL );
-		 }
-		 }
-		 */
-		//retval = true;
 		pwrForwardValue = sq(forwardValueAvg * pwrForwardFactor) / 50;
 		pwrReturnValue = sq(returnValueAvg * pwrReturnFactor) / 50;
 	}
@@ -654,7 +626,7 @@ int correction(int input)
 	}
 	else if (input <= 580)
 	{
-		input += 21;	// 8000
+		input += 21;	// 800
 	}
 	else if (input <= 717)
 	{
